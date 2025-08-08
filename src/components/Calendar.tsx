@@ -196,7 +196,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         if (startRow === endRow) {
           const left = (startCol / 7) * 100;
           const width = ((endCol - startCol + 1) / 7) * 100;
-          const top = (startRow / 6) * 100 + 20; // Add offset for header
+          const top = (startRow / 6) * 100 + 20;
           
           taskBars.push(
             <TaskBar
@@ -253,7 +253,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
             return (
               <div
                 key={index}
-                className={`min-h-[80px] p-2 bg-white relative ${
+                className={`cursor-pointer min-h-[80px] p-2 bg-white relative ${
                   !isCurrentMonth ? 'text-gray-400' : 'text-gray-900'
                 } ${isTodayDate ? 'bg-blue-50 border-2 border-blue-300' : ''}`}
                 onMouseDown={(e: React.MouseEvent) => handleMouseDown(e, date)}
@@ -290,7 +290,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         {/* Drag selection overlay */}
         {dragState.isDragging && dragState.dragType === 'create' && dragState.startDate && dragState.endDate && (
           <div
-            className="absolute bg-blue-200 opacity-50 pointer-events-none"
+            className="absolute bg-blue-200 opacity-50 cursor-move"
             style={{
               left: `${(Math.min(monthData.findIndex(d => isSameDay(d, dragState.startDate!)), 
                               monthData.findIndex(d => isSameDay(d, dragState.endDate!))) % 7) / 7 * 100}%`,

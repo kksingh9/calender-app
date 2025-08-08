@@ -41,7 +41,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
         <h3 className="text-sm font-medium text-gray-700 mb-3">Categories</h3>
         <div className="space-y-2">
           {categories.map(category => (
-            <label key={category} className="flex items-center">
+            <label key={category} className="cursor-pointer flex items-center">
               <input
                 type="checkbox"
                 checked={filters.categories.includes(category)}
@@ -59,7 +59,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
         <h3 className="text-sm font-medium text-gray-700 mb-3">Time Range</h3>
         <div className="space-y-2">
           {timeFilters.map(filter => (
-            <label key={filter.value} className="flex items-center">
+            <label key={filter.value} className="cursor-pointer flex items-center">
               <input
                 type="radio"
                 name="timeFilter"
