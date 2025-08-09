@@ -14,6 +14,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
     { value: '3weeks', label: 'Tasks within 3 weeks' }
   ];
 
+  const handleSearchChange = (searchTerm: string) => {
+    onFiltersChange({
+      ...filters,
+      searchTerm
+    });
+  };
+
   const handleCategoryChange = (category: TaskCategory, checked: boolean) => {
     const newCategories = checked
       ? [...filters.categories, category]
@@ -35,6 +42,18 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
   return (
     <div className="w-64 bg-white border-r border-gray-200 p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-6">Filters</h2>
+      
+      {/* Search by Name */}
+      <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Search by Name</h3>
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={filters.searchTerm}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        />
+      </div>
       
       {/* Category Filters */}
       <div className="mb-8">
@@ -66,9 +85,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
                 value={filter.value}
                 checked={filters.timeFilter === filter.value}
                 onChange={(e) => handleTimeFilterChange(e.target.value)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                className="cursor-pointer h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
               />
-              <span className="ml-2 text-sm text-gray-700">{filter.label}</span>
+              <span className="cursor-pointer ml-2 text-sm text-gray-700">{filter.label}</span>
             </label>
           ))}
           <label className="flex items-center">
@@ -78,9 +97,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange }) =
               value=""
               checked={filters.timeFilter === null}
               onChange={() => handleTimeFilterChange(null)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+              className="cursor-pointer h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
             />
-            <span className="ml-2 text-sm text-gray-700">All tasks</span>
+            <span className="cursor-pointer ml-2 text-sm text-gray-700">All tasks</span>
           </label>
         </div>
       </div>

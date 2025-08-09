@@ -12,6 +12,7 @@ export type TaskCategory = 'To Do' | 'In Progress' | 'Review' | 'Completed';
 export interface FilterState {
   categories: TaskCategory[];
   timeFilter: '1week' | '2weeks' | '3weeks' | null;
+  searchTerm: string;
 }
 
 export interface DragState {

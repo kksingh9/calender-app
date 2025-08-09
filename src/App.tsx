@@ -25,7 +25,8 @@ function App() {
   const [tasks, setTasks] = useState<Task[]>(loadTasksFromLocalStorage);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
-    timeFilter: null
+    timeFilter: null,
+    searchTerm: ''
   });
 
 

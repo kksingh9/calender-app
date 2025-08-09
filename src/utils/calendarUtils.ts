@@ -60,6 +60,14 @@ export const getCategoryColor = (category: TaskCategory): string => {
 export const filterTasks = (tasks: Task[], filters: FilterState): Task[] => {
   let filteredTasks = tasks;
 
+  // Filter by search term (task name)
+  if (filters.searchTerm.trim()) {
+    const searchLower = filters.searchTerm.toLowerCase().trim();
+    filteredTasks = filteredTasks.filter(task => 
+      task.name.toLowerCase().includes(searchLower)
+    );
+  }
+
   if (filters.categories.length > 0) {
     filteredTasks = filteredTasks.filter(task => 
       filters.categories.includes(task.category)
