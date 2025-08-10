@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import type { Task, DragState } from '../types';
-import { getMonthData, isToday, isSameDay, getTasksForDate, generateId } from '../utils/calendarUtils';
+import type { Task, DragState, TaskCategory } from '../types';
+import { getMonthData, isToday, isSameDay, getTasksForDate, generateId, getCategoryColor } from '../utils/calendarUtils';
 import TaskModal from './TaskModal.tsx';
 import TaskBar from './TaskBar.tsx';
 
@@ -24,6 +24,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
   const [showModal, setShowModal] = useState(false);
   const [pendingTask, setPendingTask] = useState<Partial<Task> | null>(null);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -158,21 +159,35 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
     setDraggedTask(null);
   };
 
-  const handleTaskCreate = (taskData: { name: string; category: string }) => {
-    if (!pendingTask) return;
-    
-    const newTask: Task = {
-      id: generateId(),
-      name: taskData.name,
-      category: taskData.category as any,
-      startDate: pendingTask.startDate!,
-      endDate: pendingTask.endDate!,
-      color: '#3B82F6'
-    };
-    
-    onTaskCreate(newTask);
-    setShowModal(false);
-    setPendingTask(null);
+  const handleTaskCreate = (taskData: { name: string; category: TaskCategory }) => {
+    if (editingTask) {
+      // Editing existing task
+      onTaskUpdate(editingTask.id, {
+        name: taskData.name,
+        category: taskData.category
+      });
+      setShowModal(false);
+      setEditingTask(null);
+    } else if (pendingTask) {
+      // Creating new task
+      const newTask: Task = {
+        id: generateId(),
+        name: taskData.name,
+        category: taskData.category,
+        startDate: pendingTask.startDate!,
+        endDate: pendingTask.endDate!,
+        color: getCategoryColor(taskData.category)
+      };
+      
+      onTaskCreate(newTask);
+      setShowModal(false);
+      setPendingTask(null);
+    }
+  };
+
+  const handleTaskEdit = (task: Task) => {
+    setEditingTask(task);
+    setShowModal(true);
   };
 
   const renderTaskBars = () => {
@@ -211,6 +226,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
                 zIndex: 10
               }}
               onMouseDown={(e: React.MouseEvent, edge?: 'start' | 'end') => handleMouseDown(e, taskStart, task.id, edge)}
+              onClick={handleTaskEdit}
             />
           );
         }
@@ -267,8 +283,12 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
                   {dayTasks.slice(0, 2).map(task => (
                     <div
                       key={task.id}
-                      className="text-xs px-1 py-0.5 rounded truncate"
+                      className="text-xs px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: task.color + '20', color: task.color }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTaskEdit(task);
+                      }}
                     >
                       {task.name}
                     </div>
@@ -304,14 +324,16 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         )}
       </div>
       
-      {/* Task Creation Modal */}
-      {showModal && pendingTask && (
+      {/* Task Creation/Editing Modal */}
+      {showModal && (pendingTask || editingTask) && (
         <TaskModal
           onClose={() => {
             setShowModal(false);
             setPendingTask(null);
+            setEditingTask(null);
           }}
           onSubmit={handleTaskCreate}
+          task={editingTask ? { name: editingTask.name, category: editingTask.category } : undefined}
         />
       )}
     </div>

@@ -6,9 +6,10 @@ interface TaskBarProps {
   task: Task;
   style?: React.CSSProperties;
   onMouseDown: (e: React.MouseEvent, edge?: 'start' | 'end') => void;
+  onClick?: (task: Task) => void;
 }
 
-const TaskBar: React.FC<TaskBarProps> = ({ task, style, onMouseDown }) => {
+const TaskBar: React.FC<TaskBarProps> = ({ task, style, onMouseDown, onClick }) => {
   const color = getCategoryColor(task.category);
   
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -26,11 +27,19 @@ const TaskBar: React.FC<TaskBarProps> = ({ task, style, onMouseDown }) => {
     onMouseDown(e, 'end');
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick(task);
+    }
+  };
+
   return (
     <div
       className="relative group cursor-move"
       style={style}
       onMouseDown={handleMouseDown}
+      onClick={handleClick}
     >
       <div
         className="h-full rounded px-2 py-1 text-xs font-medium text-white flex items-center justify-between"
