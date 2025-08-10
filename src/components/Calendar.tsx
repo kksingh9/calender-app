@@ -99,15 +99,23 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         }));
       } else if (dragState.dragType === 'resize' && draggedTask) {
         if (dragState.resizeEdge === 'start') {
-          setDragState(prev => ({
-            ...prev,
-            startDate: newDate
-          }));
+          // Ensure start date doesn't go beyond end date
+          const currentEndDate = new Date(draggedTask.endDate);
+          if (newDate <= currentEndDate) {
+            setDragState(prev => ({
+              ...prev,
+              startDate: newDate
+            }));
+          }
         } else if (dragState.resizeEdge === 'end') {
-          setDragState(prev => ({
-            ...prev,
-            endDate: newDate
-          }));
+          // Ensure end date doesn't go before start date
+          const currentStartDate = new Date(draggedTask.startDate);
+          if (newDate >= currentStartDate) {
+            setDragState(prev => ({
+              ...prev,
+              endDate: newDate
+            }));
+          }
         }
       }
     }
@@ -251,6 +259,18 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
+        {/* Resize info display */}
+        {dragState.isDragging && dragState.dragType === 'resize' && draggedTask && dragState.startDate && dragState.endDate && (
+          <div className="absolute top-2 right-2 bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg z-20">
+            <div className="text-sm font-medium">
+              {dragState.resizeEdge === 'start' ? 'Resizing Start Date' : 'Resizing End Date'}
+            </div>
+            <div className="text-xs opacity-90">
+              {dragState.startDate.toLocaleDateString()} - {dragState.endDate.toLocaleDateString()}
+            </div>
+          </div>
+        )}
+
         {/* Calendar Grid */}
         <div className="grid grid-cols-7 gap-px bg-gray-200">
           {/* Header */}
@@ -321,6 +341,32 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
               height: '20px'
             }}
           />
+        )}
+
+        {/* Resize preview overlay */}
+        {dragState.isDragging && dragState.dragType === 'resize' && draggedTask && dragState.startDate && dragState.endDate && (
+          <div
+            className="absolute bg-blue-300 opacity-70 cursor-ew-resize border-2 border-blue-500"
+            style={{
+              left: `${(Math.min(monthData.findIndex(d => isSameDay(d, dragState.startDate!)), 
+                              monthData.findIndex(d => isSameDay(d, dragState.endDate!))) % 7) / 7 * 100}%`,
+              top: `${Math.floor(Math.min(monthData.findIndex(d => isSameDay(d, dragState.startDate!)), 
+                                         monthData.findIndex(d => isSameDay(d, dragState.endDate!))) / 7) / 6 * 100 + 20}%`,
+              width: `${(Math.abs(monthData.findIndex(d => isSameDay(d, dragState.startDate!)) - 
+                                 monthData.findIndex(d => isSameDay(d, dragState.endDate!))) + 1) / 7 * 100}%`,
+              height: '20px'
+            }}
+          >
+            {/* Resize edge indicator */}
+            <div className="absolute inset-0 flex items-center justify-between px-1">
+              {dragState.resizeEdge === 'start' && (
+                <div className="w-1 h-4 bg-blue-600 rounded-full animate-pulse" />
+              )}
+              {dragState.resizeEdge === 'end' && (
+                <div className="w-1 h-4 bg-blue-600 rounded-full animate-pulse ml-auto" />
+              )}
+            </div>
+          </div>
         )}
       </div>
       

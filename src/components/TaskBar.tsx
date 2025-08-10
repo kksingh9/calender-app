@@ -50,12 +50,14 @@ const TaskBar: React.FC<TaskBarProps> = ({ task, style, onMouseDown, onClick }) 
         {/* Resize handles */}
         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <div
-            className="w-1 h-3 bg-white bg-opacity-50 rounded cursor-ew-resize hover:bg-opacity-75"
+            className="w-2 h-4 bg-white bg-opacity-70 rounded cursor-ew-resize hover:bg-opacity-100 hover:scale-110 transition-all duration-200 border border-white border-opacity-50"
             onMouseDown={handleResizeStart}
+            title="Drag to resize start date"
           />
           <div
-            className="w-1 h-3 bg-white bg-opacity-50 rounded cursor-ew-resize hover:bg-opacity-75"
+            className="w-2 h-4 bg-white bg-opacity-70 rounded cursor-ew-resize hover:bg-opacity-100 hover:scale-110 transition-all duration-200 border border-white border-opacity-50"
             onMouseDown={handleResizeEnd}
+            title="Drag to resize end date"
           />
         </div>
       </div>

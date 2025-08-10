@@ -26,7 +26,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ onClose, onSubmit, task }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-transparent bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-w-md border border-gray-200 shadow-xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
@@ -34,7 +34,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ onClose, onSubmit, task }) => {
           </h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,7 +68,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ onClose, onSubmit, task }) => {
                     key={cat}
                     type="button"
                     onClick={() => setCategory(cat)}
-                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                    className={`cursor-pointer p-3 rounded-lg border-2 transition-all duration-200 ${
                       isSelected 
                         ? 'border-blue-500 bg-blue-50 shadow-md' 
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
