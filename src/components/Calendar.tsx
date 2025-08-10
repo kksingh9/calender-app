@@ -12,7 +12,7 @@ interface CalendarProps {
 }
 
 const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }) => {
-  const [currentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     startDate: null,
@@ -33,6 +33,49 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  const navigateToMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prevDate => {
+      const newDate = new Date(prevDate);
+      if (direction === 'prev') {
+        newDate.setMonth(prevDate.getMonth() - 1);
+      } else {
+        newDate.setMonth(prevDate.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
+
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  const handleMonthYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const [month, year] = e.target.value.split('-');
+    setCurrentDate(new Date(parseInt(year), parseInt(month), 1));
+  };
+
+  // Keyboard navigation
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      navigateToMonth('prev');
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      navigateToMonth('next');
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goToToday();
+    }
+  };
+
+  // Add keyboard event listener
+  React.useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent, date: Date, taskId?: string, edge?: 'start' | 'end') => {
     e.preventDefault();
@@ -247,9 +290,73 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
   return (
     <div className="flex-1 p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-        </h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <h1 className="text-2xl font-bold text-gray-800">
+              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </h1>
+            
+            {/* Indicator when not on current month */}
+            {!isToday(currentDate) && (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm text-gray-500">
+                  {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => navigateToMonth('prev')}
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Previous month"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            {/* Month/Year Picker */}
+            <select
+              value={`${currentDate.getMonth()}-${currentDate.getFullYear()}`}
+              onChange={handleMonthYearChange}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+            >
+              {Array.from({ length: 24 }, (_, i) => {
+                const date = new Date();
+                date.setMonth(date.getMonth() - 12 + i);
+                return (
+                  <option key={i} value={`${date.getMonth()}-${date.getFullYear()}`}>
+                    {monthNames[date.getMonth()]} {date.getFullYear()}
+                  </option>
+                );
+              })}
+            </select>
+            
+            <button
+              onClick={goToToday}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${
+                isToday(currentDate) 
+                  ? 'bg-blue-600 text-white border-blue-600' 
+                  : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300'
+              }`}
+            >
+              Today
+            </button>
+            
+            <button
+              onClick={() => navigateToMonth('next')}
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Next month"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
       
       <div 
@@ -272,7 +379,7 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
         )}
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
+        <div className="grid grid-cols-7 gap-px bg-gray-200 transition-all duration-300 ease-in-out">
           {/* Header */}
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} className="bg-gray-50 p-3 text-center text-sm font-medium text-gray-700">
@@ -289,8 +396,10 @@ const Calendar: React.FC<CalendarProps> = ({ tasks, onTaskCreate, onTaskUpdate }
             return (
               <div
                 key={index}
-                className={`cursor-pointer min-h-[80px] p-2 bg-white relative ${
-                  !isCurrentMonth ? 'text-gray-400' : 'text-gray-900'
+                className={`cursor-pointer min-h-[80px] p-2 relative transition-colors ${
+                  !isCurrentMonth 
+                    ? 'bg-gray-50 text-gray-400' 
+                    : 'bg-white text-gray-900 hover:bg-gray-50'
                 } ${isTodayDate ? 'bg-blue-50 border-2 border-blue-300' : ''}`}
                 onMouseDown={(e: React.MouseEvent) => handleMouseDown(e, date)}
               >
